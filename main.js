@@ -1,5 +1,3 @@
-import './style.css'
-
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
