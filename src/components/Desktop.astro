@@ -8,13 +8,14 @@ import Experience from './apps/Experience.astro';
 import Projects from './apps/Projects.astro';
 import Contact from './apps/Contact.astro';
 import Personalization from './apps/Personalization.astro';
+import hamster from '../assets/hamster.webp'
 
 const appComponents = { about: About, experience: Experience, projects: Projects, contact: Contact, personalization: Personalization };
 ---
 <div class="desktop-shell" data-desktop-shell>
 
   <header class="desktop-brand" data-snap-target>
-    <img class="brand-mark" src="/src/assets/hamster.webp"/>
+    <img class="brand-mark" src={hamster.src}/>
     <div>
       <strong>PetroDesk</strong>
       <span>kip_portfolio.exe</span>
