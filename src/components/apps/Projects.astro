@@ -1,0 +1,42 @@
+---
+const projects = [
+  { ispic: false, pic: '/', name: 'Europeana Search Engine', type: 'Vector Search Engine', year: '2023-2024', note: "This is a simple search engine for the Europeana vector database for my barchelor's degree final project.", icon: '🇪🇺', link: 'https://github.com/petropok/europeanaproj' },
+  { ispic: false, pic: '/', name: 'Portfolio Website', type: 'Website', year: '2026', note: 'This website you are on right now.', icon: '🌐' , link: 'https://github.com/petropok/petropok.github.io'},
+  { ispic: false, pic: '/', name: 'Tampering Detection Model', type: 'ML Model', year: '2026', note: 'A multimedia tampering detection machine learning model that uses ENF signals.', icon: '🤖' , link: '/'},
+  { ispic: false, pic: '/', name: 'SwordBow Game', type: 'Game', year: '2025-2026', note: 'A 2D platformer that is a combination of Angry Birds and Jetpack Joyride.', icon: '🗡️' , link: '/'},
+];
+---
+<section class="app-content projects-app">
+  <div class="section-intro">
+    <div>
+      <span class="eyebrow">MY COMPUTER / PROJECTS</span>
+      <h1>Selected work</h1>
+    </div>
+    <!-- <button class="soft-button" type="button" data-toast="Opening project index...">↗ Project index</button> -->
+  </div>
+  <div class="project-grid">
+    {projects.map((project) => (
+      <article class="project-card">
+        {project.ispic ?
+          <div class="project-thumb" aria-hidden="true">
+            <img />
+          </div>
+          :
+          <div class="project-thumb" aria-hidden="true">
+            <span class="project-cloud cloud-one"></span>
+            <span class="project-cloud cloud-two"></span>
+            <span class="project-icon">{project.icon}</span>
+            <span class="project-sheen"></span>
+          </div>
+        }
+        
+        <div class="project-body">
+          <div class="project-meta"><span>{project.type}</span><span>{project.year}</span></div>
+          <h2>{project.name}</h2>
+          <p>{project.note}</p>
+          {project.link !== '/' && <a href={project.link} class="project-link" type="button" data-toast={`Loading ${project.name}...`}>↗ Open Project</a>}
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

@@ -1,0 +1,46 @@
+---
+import { apps } from '../lib/apps';
+---
+<footer class="taskbar" data-snap-target>
+  <button class="start-button" type="button" data-start-button aria-expanded="false" aria-controls="start-menu">
+    <span class="start-orb" aria-hidden="true">⊞</span>
+    <span>Start</span>
+  </button>
+
+  <nav class="task-buttons" aria-label="Open apps">
+    {apps.map((app) => (
+      <button class="task-button" type="button" data-task-button={app.id} aria-controls={`window-${app.id}`} aria-pressed="false">
+        <span aria-hidden="true">{app.icon}</span>
+        <span>{app.shortLabel}</span>
+      </button>
+    ))}
+  </nav>
+
+  <div class="system-tray" aria-label="System status">
+    <span class="tray-dot" aria-hidden="true"></span>
+    <span class="tray-text">Wi-Fi</span>
+    <span class="tray-clock" data-clock>--:--</span>
+  </div>
+</footer>
+
+<div class="start-menu" id="start-menu" data-start-menu hidden>
+  <div class="start-menu-brand">
+    <div class="avatar-tile">✦</div>
+    <div>
+      <strong>kip.exe</strong>
+      <span>Portfolio Desktop</span>
+    </div>
+  </div>
+  <div class="start-menu-apps">
+    {apps.map((app) => (
+      <button type="button" class="start-app" data-open-app={app.id}>
+        <span class="start-app-icon" aria-hidden="true">{app.icon}</span>
+        <span>{app.title}</span>
+      </button>
+    ))}
+  </div>
+  <div class="start-menu-footer">
+    <span>All systems nominal</span>
+    <span>v1.0.0</span>
+  </div>
+</div>

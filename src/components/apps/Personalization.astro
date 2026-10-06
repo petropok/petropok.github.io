@@ -1,0 +1,86 @@
+---
+import { themes } from '../../lib/themes';
+---
+
+<section class="app-content personalization-app">
+  <div class="section-intro">
+    <div>
+      <span class="eyebrow">CONTROL PANEL / APPEARANCE</span>
+      <h1>Personalization</h1>
+    </div>
+
+    <span class="status-pill" data-active-theme>
+      Aero
+    </span>
+  </div>
+
+  <!-- <div class="theme-grid">
+    {themes.map((theme) => (
+      <button
+        type="button"
+        class="theme-card"
+        data-theme-id={theme.id}
+      >
+        <div
+          class="theme-preview"
+          style={`--preview-bg:${theme.variables['--sky']}`}
+        >
+          <span class="preview-window"></span>
+          <span class="preview-sun"></span>
+          <span class="preview-hill"></span>
+        </div>
+
+        <div class="theme-card-body">
+          <strong>{theme.name}</strong>
+          <span>{theme.description}</span>
+        </div>
+      </button>
+    ))}
+  </div>
+</section> -->
+<span>UNDER CONSTRUCTION</span>
+
+<script>
+  import { themeManager } from '../../lib/ThemeManager';
+  import type { ThemeId } from '../../lib/themes';
+
+  const buttons =
+    document.querySelectorAll<HTMLButtonElement>(
+      '[data-theme-id]',
+    );
+
+  const activeTheme =
+    document.querySelector<HTMLElement>(
+      '[data-active-theme]',
+    );
+
+  function updateSelectedTheme() {
+    const current = themeManager.getCurrentTheme();
+
+    if (!current) return;
+
+    if (activeTheme) {
+      activeTheme.textContent = current.name;
+    }
+
+    buttons.forEach((button) => {
+      button.dataset.active =
+        button.dataset.themeId === current.id
+          ? 'true'
+          : 'false';
+    });
+  }
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.themeId as ThemeId;
+
+      if (!id) return;
+
+      themeManager.apply(id);
+      updateSelectedTheme();
+    });
+  });
+
+  updateSelectedTheme();
+</script>

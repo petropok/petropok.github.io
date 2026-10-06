@@ -1,0 +1,63 @@
+---
+import type { AppDefinition } from '../lib/apps';
+
+interface Props extends AppDefinition {
+  zIndex: number;
+}
+
+const { id, title, icon, desktopPosition, zIndex, initialOpen = false } = Astro.props;
+---
+<article
+  class="window"
+  id={`window-${id}`}
+  data-window-id={id}
+  data-state={initialOpen ? "normal" : "closed"}
+  data-resizable="true"
+  style={`--window-x:${desktopPosition.x};--window-y:${desktopPosition.y};--window-w:${desktopPosition.width};--window-h:${desktopPosition.height};z-index:${zIndex}`}
+  aria-labelledby={`window-title-${id}`}
+>
+  <header class="window-titlebar" data-drag-handle>
+    <div class="window-title">
+      <span class="window-icon" aria-hidden="true">{icon}</span>
+      <h2 id={`window-title-${id}`}>{title}</h2>
+    </div>
+    <div class="window-controls" role="group" aria-label={`${title} window controls`}>
+      <button class="chrome-button minimize" type="button" data-window-action="minimize" title="Minimize" aria-label={`Minimize ${title}`}>_</button>
+      <button class="chrome-button maximize" type="button" data-window-action="maximize" title="Maximize" aria-label={`Maximize ${title}`}>□</button>
+      <button class="chrome-button close" type="button" data-window-action="close" title="Close" aria-label={`Close ${title}`}>×</button>
+    </div>
+  </header>
+
+  <!-- <div class="window-tabs" data-tab-list aria-label={`${title} tabs`}>
+    <button class="window-tab is-active" type="button" data-window-tab="main" aria-selected="true">
+      <span aria-hidden="true">{icon}</span>
+      <span>{title}</span>
+      <span
+        class="window-tab-close"
+        role="button"
+        tabindex="0"
+        data-window-tab-close="main"
+        aria-label={`Close ${title} tab`}
+        title="Close tab"
+      >×</span>
+    </button>
+  </div> -->
+
+  <div class="window-body" tabindex="0">
+    <slot />
+  </div>
+
+  <footer class="window-statusbar" aria-hidden="true">
+    <span class="status-spacer"></span>
+    <span>{id}.app</span>
+  </footer>
+
+  <div class="resize-handle resize-n" data-resize="n" aria-hidden="true"></div>
+  <div class="resize-handle resize-ne" data-resize="ne" aria-hidden="true"></div>
+  <div class="resize-handle resize-e" data-resize="e" aria-hidden="true"></div>
+  <div class="resize-handle resize-se" data-resize="se" aria-hidden="true"></div>
+  <div class="resize-handle resize-s" data-resize="s" aria-hidden="true"></div>
+  <div class="resize-handle resize-sw" data-resize="sw" aria-hidden="true"></div>
+  <div class="resize-handle resize-w" data-resize="w" aria-hidden="true"></div>
+  <div class="resize-handle resize-nw" data-resize="nw" aria-hidden="true"></div>
+</article>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KIP favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fe7ff"/>
+      <stop offset="0.5" stop-color="#57c8ef"/>
+      <stop offset="1" stop-color="#2b94c8"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.96"/>
+      <stop offset="0.5" stop-color="#dff8ff" stop-opacity="0.66"/>
+      <stop offset="1" stop-color="#b7eaf8" stop-opacity="0.42"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="20%" r="75%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.98"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="text" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e5fbff"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#175c7d" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bg)"/>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#glow)"/>
+
+  <!-- Aero glass face -->
+  <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#glass)" opacity="0.55"/>
+  <path d="M7 18C18 9 40 8 57 14v-2A6 6 0 0 0 51 6H13a6 6 0 0 0-6 6z" fill="#fff" opacity="0.28"/>
+
+  <!-- Glossy star accent -->
+  <path d="M49 9l1.7 4.5L55 15l-4.3 1.7L49 21l-1.7-4.3L43 15l4.3-1.5z" fill="#fff" opacity="0.85"/>
+
+  <!-- KIP wordmark -->
+  <g filter="url(#shadow)" fill="url(#text)" font-family="Arial Rounded MT Bold, Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="1">
+    <text x="32" y="39" text-anchor="middle">KIP</text>
+  </g>
+
+  <!-- soft highlight -->
+  <path d="M10 12c4-3 10-5 17-5 6 0 12 1 16 3-8-1-18-1-28 2-2 .6-4 1.4-5 2z" fill="#fff" opacity="0.45"/>
+
+  <rect x="2.5" y="2.5" width="59" height="59" rx="14.5" fill="none" stroke="#fff" stroke-opacity="0.75"/>
+  <rect x="3.5" y="3.5" width="57" height="57" rx="13.5" fill="none" stroke="#167aaa" stroke-opacity="0.28"/>
+</svg>

@@ -1,0 +1,9 @@
+---
+import type { AppDefinition } from '../lib/apps';
+
+const { id, title, icon } = Astro.props as AppDefinition;
+---
+<button class="desktop-icon" type="button" data-open-app={id} aria-label={`Open ${title}`}>
+  <span class="desktop-icon-art" aria-hidden="true">{icon}</span>
+  <span class="desktop-icon-label">{title}</span>
+</button>
