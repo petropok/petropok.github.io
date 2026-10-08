@@ -1,4 +1,4 @@
-export type AppId = 'about' | 'experience' | 'projects' | 'contact' | 'personalization';
+export type AppId = 'about' | 'experience' | 'projects' | 'contact' | 'settings';
 
 export type AppDefinition = {
   id: AppId;
@@ -93,10 +93,10 @@ export const apps: AppDefinition[] = [
     initialOpen: false,
   },
   {
-    id: 'personalization',
-    title: 'Personalize',
-    icon: '🎨',
-    shortLabel: 'Themes',
+    id: 'settings',
+    title: 'Settings',
+    icon: '⚙️',
+    shortLabel: 'Settings',
     desktopPosition: {
       x: '25vw',
       y: '12vh',

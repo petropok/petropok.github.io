@@ -4,6 +4,7 @@ import {
   calculateResize,
   cloneRect,
   getDeviceCapabilities,
+  getViewportSnap,
   snapToTargets,
   snapToViewport,
   TASKBAR_HEIGHT,
@@ -44,6 +45,7 @@ export class WindowManager {
   private dragSession: DragSession | null = null;
   private resizeSession: ResizeSession | null = null;
   private snapTargets: SnapTargetCache = [];
+  private activeViewportSnap: ReturnType<typeof getViewportSnap> = null;
   private capabilities: DeviceCapabilities;
   private renderQueued = false;
 
@@ -71,14 +73,14 @@ export class WindowManager {
       if (!id) return;
 
       const domRect = el.getBoundingClientRect();
-      const app = apps.find((candidate) => candidate.id === id);
-
-      const rect: WindowRect = {
+      const rect = {
         x: domRect.left,
         y: domRect.top,
-        width: app?.initialRect.width ?? 520,
-        height: app?.initialRect.height ?? 420,
+        width: domRect.width || 520,
+        height: domRect.height || 420,
       };
+
+      const app = apps.find((candidate) => candidate.id === id);
 
       const state: WindowState = {
         id,
@@ -171,6 +173,7 @@ export class WindowManager {
           startRect: cloneRect(state.rect),
         };
         this.snapTargets = this.collectSnapTargets(el);
+        this.activeViewportSnap = null;
         handle.setPointerCapture(event.pointerId);
         document.body.classList.add('dragging-window');
       });
@@ -184,17 +187,43 @@ export class WindowManager {
           x: this.dragSession.startRect.x + dx,
           y: this.dragSession.startRect.y + dy,
         };
+
+        this.activeViewportSnap = getViewportSnap(state.rect);
         this.updateSnapPreview(state.rect);
         this.scheduleRender();
       });
 
-      handle.addEventListener('pointerup', () => {
-        if (!this.dragSession) return;
-        state.rect = snapToViewport(state.rect);
-        state.rect = snapToTargets(state.rect, this.snapTargets);
-        this.hideSnapPreview();
-        this.endPointerInteraction();
+      handle.addEventListener('pointerup', (event) => {
+        if (!this.dragSession || event.pointerId !== this.dragSession.pointerId) return;
+
+        // Recompute from the final pointer position first so the last few pixels
+        // of the drag cannot be lost between pointermove and pointerup.
+        const dx = event.clientX - this.dragSession.startPointerX;
+        const dy = event.clientY - this.dragSession.startPointerY;
+        state.rect = {
+          ...this.dragSession.startRect,
+          x: this.dragSession.startRect.x + dx,
+          y: this.dragSession.startRect.y + dy,
+        };
+
+        // Commit the exact rectangle represented by the visible preview.
+        // This keeps the preview and final window geometry perfectly in sync.
+        const viewportSnap = this.activeViewportSnap ?? getViewportSnap(state.rect);
+
+        if (viewportSnap) {
+          state.previousRect = cloneRect(this.dragSession.startRect);
+          state.rect = cloneRect(viewportSnap.rect);
+          state.mode = viewportSnap.zone === 'top-maximize' ? 'maximized' : 'normal';
+        } else {
+          state.rect = snapToViewport(state.rect);
+          state.rect = snapToTargets(state.rect, this.snapTargets);
+          state.mode = 'normal';
+        }
+
+        // Render before releasing the interaction state so the real window
+        // receives the exact geometry that was previewed.
         this.render();
+        this.endPointerInteraction();
       });
 
       handle.addEventListener('pointercancel', () => this.endPointerInteraction());
@@ -271,21 +300,16 @@ export class WindowManager {
     const preview = this.root.querySelector<HTMLElement>('[data-snap-preview]');
     if (!preview || this.capabilities.isMobile) return;
 
-    const right = window.innerWidth - (rect.x + rect.width);
-    const bottom = window.innerHeight - TASKBAR_HEIGHT - (rect.y + rect.height);
-    let next: WindowRect | null = null;
+    const viewportSnap = this.activeViewportSnap ?? getViewportSnap(rect);
 
-    if (rect.x <= 6) next = { x: 0, y: 0, width: window.innerWidth / 2 - 8, height: window.innerHeight - TASKBAR_HEIGHT };
-    else if (right <= 6) next = { x: window.innerWidth / 2 + 8, y: 0, width: window.innerWidth / 2 - 8, height: window.innerHeight - TASKBAR_HEIGHT };
-    else if (rect.y <= 6) next = updateMaximizedRect();
-    else if (bottom <= 6) next = { x: 0, y: window.innerHeight / 2 + 8, width: window.innerWidth, height: window.innerHeight / 2 - TASKBAR_HEIGHT - 8 };
-
-    if (!next) {
+    if (!viewportSnap) {
       preview.classList.remove('visible');
       return;
     }
 
+    const next = viewportSnap.rect;
     preview.classList.add('visible');
+    preview.dataset.snapZone = viewportSnap.zone;
     preview.style.left = `${next.x}px`;
     preview.style.top = `${next.y}px`;
     preview.style.width = `${next.width}px`;
@@ -299,6 +323,7 @@ export class WindowManager {
   private endPointerInteraction() {
     this.dragSession = null;
     this.resizeSession = null;
+    this.activeViewportSnap = null;
     this.snapTargets = [];
     this.hideSnapPreview();
     document.body.classList.remove('dragging-window', 'resizing-window');
@@ -322,13 +347,13 @@ export class WindowManager {
 
     if (item.state.mode === 'closed') {
       this.ensureDefaultTab(item.el);
-      item.state.rect =
-        this.getInitialRect(id);
+      if (!item.state.rect.width || !item.state.rect.height) {
+        item.state.rect = this.getFallbackRect(item.el);
+      }
     }
 
     item.state.mode = 'normal';
     item.el.removeAttribute('hidden');
-
     this.focus(id);
   }
 
@@ -367,14 +392,11 @@ export class WindowManager {
     const item = this.windows.get(id);
     if (!item) return;
 
-    item.state.rect =
-      item.state.previousRect
-        ? cloneRect(item.state.previousRect)
-        : this.getInitialRect(id);
-
+    item.state.rect = item.state.previousRect
+      ? cloneRect(item.state.previousRect)
+      : this.getFallbackRect(item.el);
     item.state.previousRect = undefined;
     item.state.mode = 'normal';
-
     this.focus(id);
   }
 
@@ -439,31 +461,15 @@ export class WindowManager {
     if (next) this.focus(next.state.id);
   }
 
-  private getInitialRect(id: string): WindowRect {
-    const app = apps.find(
-      (candidate) => candidate.id === id,
-    );
-
-    const width =
-      app?.initialRect.width ?? 520;
-
-    const height =
-      app?.initialRect.height ?? 420;
-
+  private getFallbackRect(el: HTMLElement): WindowRect {
     return {
-      x: Math.max(
-        12,
-        (window.innerWidth - width) / 2,
-      ),
-      y: Math.max(
-        70,
-        (window.innerHeight - height) / 2,
-      ),
-      width,
-      height,
+      x: Math.max(12, (window.innerWidth - Math.min(640, window.innerWidth - 24)) / 2),
+      y: 76,
+      width: Math.min(640, window.innerWidth - 24),
+      height: Math.min(520, window.innerHeight - TASKBAR_HEIGHT - 90),
     };
   }
-  
+
   private syncResponsiveLayout() {
     this.capabilities = getDeviceCapabilities();
     this.root.dataset.mobile = this.capabilities.isMobile ? 'true' : 'false';

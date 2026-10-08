@@ -1,4 +1,4 @@
-# AeroDesk Portfolio
+# Frutiger Aero type Portfolio
 
 A modular Astro portfolio styled like a glossy early-Windows desktop with a Frutiger Aero-inspired visual language.
 
@@ -49,5 +49,3 @@ Build for production:
 ```bash
 npm run build
 ```
-
-The contact form is UI-only until you connect it to a real endpoint.

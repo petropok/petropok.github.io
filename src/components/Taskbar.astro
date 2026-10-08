@@ -1,9 +1,10 @@
 ---
 import { apps } from '../lib/apps';
+import hamster from '../assets/hamster.webp'
 ---
 <footer class="taskbar" data-snap-target>
   <button class="start-button" type="button" data-start-button aria-expanded="false" aria-controls="start-menu">
-    <span class="start-orb" aria-hidden="true">⊞</span>
+    <span class="start-orb" aria-hidden="true">🦢</span>
     <span>Start</span>
   </button>
 
@@ -25,7 +26,7 @@ import { apps } from '../lib/apps';
 
 <div class="start-menu" id="start-menu" data-start-menu hidden>
   <div class="start-menu-brand">
-    <div class="avatar-tile">✦</div>
+    <img class="avatar-tile" src={hamster.src} alt="profile picture"/>
     <div>
       <strong>kip.exe</strong>
       <span>Portfolio Desktop</span>

@@ -26,6 +26,14 @@ export const SNAP_DISTANCE = 14;
 export const MIN_WINDOW_WIDTH = 320;
 export const MIN_WINDOW_HEIGHT = 240;
 
+export type ViewportSnapZone = 'left-half' | 'right-half' | 'top-maximize' | 'bottom-half';
+
+export type ViewportSnap = {
+  zone: ViewportSnapZone;
+  rect: WindowRect;
+};
+
+
 export function getDeviceCapabilities(): DeviceCapabilities {
   const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
   const noHover = window.matchMedia('(hover: none)').matches;
@@ -96,6 +104,63 @@ export function calculateResize(
   }
 
   return clampRect({ x, y, width, height });
+}
+
+export function getViewportSnap(rect: WindowRect): ViewportSnap | null {
+  const availableHeight = Math.max(window.innerHeight - TASKBAR_HEIGHT, MIN_WINDOW_HEIGHT);
+  const nearLeft = rect.x <= SNAP_DISTANCE;
+  const nearRight = window.innerWidth - (rect.x + rect.width) <= SNAP_DISTANCE;
+  const nearTop = rect.y <= SNAP_DISTANCE;
+  const nearBottom = availableHeight - (rect.y + rect.height) <= SNAP_DISTANCE;
+
+  // Match the visual preview order so what the user sees is exactly what
+  // gets committed on pointerup. Top wins at corners, like desktop OSes.
+  if (nearTop) {
+    return {
+      zone: 'top-maximize',
+      rect: updateMaximizedRect(),
+    };
+  }
+
+  if (nearLeft) {
+    return {
+      zone: 'left-half',
+      rect: {
+        x: 0,
+        y: 0,
+        width: Math.max(MIN_WINDOW_WIDTH, Math.floor(window.innerWidth / 2) - 8),
+        height: availableHeight,
+      },
+    };
+  }
+
+  if (nearRight) {
+    const width = Math.max(MIN_WINDOW_WIDTH, Math.floor(window.innerWidth / 2) - 8);
+    return {
+      zone: 'right-half',
+      rect: {
+        x: window.innerWidth - width,
+        y: 0,
+        width,
+        height: availableHeight,
+      },
+    };
+  }
+
+  if (nearBottom) {
+    const y = Math.floor(availableHeight / 2) + 4;
+    return {
+      zone: 'bottom-half',
+      rect: {
+        x: 0,
+        y,
+        width: window.innerWidth,
+        height: Math.max(MIN_WINDOW_HEIGHT, availableHeight - y),
+      },
+    };
+  }
+
+  return null;
 }
 
 export function snapToViewport(rect: WindowRect): WindowRect {
