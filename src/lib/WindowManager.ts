@@ -347,9 +347,12 @@ export class WindowManager {
 
     if (item.state.mode === 'closed') {
       this.ensureDefaultTab(item.el);
-      if (!item.state.rect.width || !item.state.rect.height) {
-        item.state.rect = this.getFallbackRect(item.el);
-      }
+
+      item.state.rect =
+        this.getInitialRect(id);
+
+      item.state.previousRect =
+        undefined;
     }
 
     item.state.mode = 'normal';
@@ -502,6 +505,33 @@ export class WindowManager {
       button.dataset.minimized = item.state.mode === 'minimized' ? 'true' : 'false';
       button.setAttribute('aria-pressed', String(this.activeId === id));
     });
+  }
+  
+  private getInitialRect(id: string): WindowRect {
+    const app = apps.find((candidate) => candidate.id === id);
+
+    const width = Math.min(
+      app?.initialRect.width ?? 520,
+      Math.max(320, window.innerWidth - 24),
+    );
+
+    const height = Math.min(
+      app?.initialRect.height ?? 420,
+      Math.max(240, window.innerHeight - TASKBAR_HEIGHT - 90),
+    );
+
+    return {
+      x: Math.max(
+        12,
+        (window.innerWidth - width) / 2,
+      ),
+      y: Math.max(
+        70,
+        (window.innerHeight - TASKBAR_HEIGHT - height) / 2,
+      ),
+      width,
+      height,
+    };
   }
 
   private render() {
