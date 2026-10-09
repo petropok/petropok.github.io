@@ -73,18 +73,13 @@ export class WindowManager {
       if (!id) return;
 
       const domRect = el.getBoundingClientRect();
-      const rect = {
-        x: domRect.left,
-        y: domRect.top,
-        width: domRect.width || 520,
-        height: domRect.height || 420,
-      };
+      const rect = this.getInitialRect(id);
 
       const app = apps.find((candidate) => candidate.id === id);
 
       const state: WindowState = {
         id,
-        rect,
+        rect: this.getInitialRect(id),
         mode: app?.initialOpen === true ? 'normal' : 'closed',
         zIndex: index + 10,
       };
@@ -343,20 +338,32 @@ export class WindowManager {
 
   open(id: string) {
     const item = this.windows.get(id);
+
     if (!item) return;
 
     if (item.state.mode === 'closed') {
       this.ensureDefaultTab(item.el);
 
-      item.state.rect =
-        this.getInitialRect(id);
+      // Only initialize if the stored in-memory
+      // geometry is invalid or missing.
+      const rect = item.state.rect;
 
-      item.state.previousRect =
-        undefined;
+      if (
+        !Number.isFinite(rect.x) ||
+        !Number.isFinite(rect.y) ||
+        !Number.isFinite(rect.width) ||
+        !Number.isFinite(rect.height) ||
+        rect.width <= 0 ||
+        rect.height <= 0
+      ) {
+        item.state.rect = this.getInitialRect(id);
+      }
     }
 
     item.state.mode = 'normal';
+
     item.el.removeAttribute('hidden');
+
     this.focus(id);
   }
 
@@ -508,26 +515,74 @@ export class WindowManager {
   }
   
   private getInitialRect(id: string): WindowRect {
-    const app = apps.find((candidate) => candidate.id === id);
+    const app = apps.find(
+      (candidate) => candidate.id === id,
+    );
 
+    if (!app) {
+      return this.getFallbackRect(
+        document.createElement('div'),
+      );
+    }
+
+    const position = app.desktopPosition;
+
+    // Let the browser resolve CSS values such as
+    // 7vw, 8vh, calc(), and min().
+    const probe = document.createElement('div');
+
+    Object.assign(probe.style, {
+      position: 'fixed',
+      left: position.x,
+      top: position.y,
+      width: position.width,
+      height: position.height,
+      boxSizing: 'border-box',
+      margin: '0',
+      padding: '0',
+      border: '0',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+    });
+
+    document.body.appendChild(probe);
+
+    const measured = probe.getBoundingClientRect();
+    probe.remove();
+
+    // Keep initialRect as the source of truth for size.
     const width = Math.min(
-      app?.initialRect.width ?? 520,
+      app.initialRect.width,
       Math.max(320, window.innerWidth - 24),
     );
 
     const height = Math.min(
-      app?.initialRect.height ?? 420,
-      Math.max(240, window.innerHeight - TASKBAR_HEIGHT - 90),
+      app.initialRect.height,
+      Math.max(
+        240,
+        window.innerHeight - TASKBAR_HEIGHT - 90,
+      ),
+    );
+
+    // Keep the starting position inside the available desktop.
+    const maxX = Math.max(
+      12,
+      window.innerWidth - width - 12,
+    );
+
+    const maxY = Math.max(
+      70,
+      window.innerHeight - TASKBAR_HEIGHT - height - 12,
     );
 
     return {
-      x: Math.max(
-        12,
-        (window.innerWidth - width) / 2,
+      x: Math.min(
+        Math.max(measured.left, 12),
+        maxX,
       ),
-      y: Math.max(
-        70,
-        (window.innerHeight - TASKBAR_HEIGHT - height) / 2,
+      y: Math.min(
+        Math.max(measured.top, 70),
+        maxY,
       ),
       width,
       height,

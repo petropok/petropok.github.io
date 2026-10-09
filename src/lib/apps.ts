@@ -31,7 +31,7 @@ export const apps: AppDefinition[] = [
     desktopPosition: {
       x: '7vw',
       y: '8vh',
-      width: '620px',
+      width: '620px', 
       height: '540px',
     },
 
@@ -49,15 +49,15 @@ export const apps: AppDefinition[] = [
     shortLabel: 'Experience',
 
     desktopPosition: {
-      x: '44vw',
-      y: '13vh',
-      width: '660px',
-      height: '280px',
+      x: '6vw',
+      y: '7vh',
+      width: '660px', 
+      height: '520px',
     },
 
     initialRect: {
       width: 660,
-      height: 280,
+      height: 520,
     },
 
     initialOpen: false,
@@ -69,10 +69,10 @@ export const apps: AppDefinition[] = [
     shortLabel: 'Projects',
 
     desktopPosition: { 
-      x: '14vw', 
-      y: '41vh', 
-      width: 'min(760px, 65vw)', 
-      height: 'min(560px, 72vh)' 
+      x: '9vw', 
+      y: '8vh', 
+      width: '660px', 
+      height: '520px',
     },
     initialRect: {
       width: 660,
@@ -85,7 +85,12 @@ export const apps: AppDefinition[] = [
     title: 'Contact',
     icon: '✉️',
     shortLabel: 'Contact',
-    desktopPosition: { x: '57vw', y: '48vh', width: 'min(520px, 48vw)', height: 'min(430px, 58vh)' },
+    desktopPosition: { 
+      x: '10vw',
+      y: '7vh',
+      width: '660px',
+      height: '520px',
+    },
     initialRect: {
       width: 660,
       height: 520,
@@ -98,10 +103,10 @@ export const apps: AppDefinition[] = [
     icon: '⚙️',
     shortLabel: 'Settings',
     desktopPosition: {
-      x: '25vw',
-      y: '12vh',
-      width: 'min(620px, 58vw)',
-      height: 'min(500px, 68vh)',
+      x: '11vw',
+      y: '9vh',
+      width: '620px',
+      height: '520px',
     },
     initialRect: {
       width: 660,
